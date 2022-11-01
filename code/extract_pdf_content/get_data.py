@@ -39,7 +39,20 @@ class ExtractFromPdf:
         return matches
 
     def get_image(self) -> None:
-        pass
+        pdf = fitz.open(self.file_path)
+        counter = 1
+        for i in range(len(pdf)): # number of pages
+            page = pdf[i]
+            images = page.get_images()
+            for image in images:
+                base_image = pdf.extract_image(image[0]) # meta data of the image
+                image_data = base_image["image"]
+                img = PIL.Image.open(io.BytesIO(image_data))
+                extension = base_image['ext'] # image extension
+                img.save(open(f"image{counter}.{extension}", "wb"))
+                counter += 1
 
     def get_tables(self) -> pd.DataFrame:
-        pass
+        tables = tabula.read_pdf(self.file_path, pages="all")
+        df = tables[0]
+        return df
